@@ -44,26 +44,30 @@ if __name__ == '__main__':
 
     try:
         friends = method.friends.get().get('items')
+        print(friends)
         MAX_PHOTOS = 1000
 
         while len(friends):
-            try:
-                sfriends = ','.join(str(friend) for friend in friends[:MAX_PHOTOS])
-                users = method.users.get(user_ids=sfriends, fields='photo_id')
+            sfriends = ','.join(str(friend) for friend in friends[:MAX_PHOTOS])
+            users = method.users.get(user_ids=sfriends, fields='photo_id')
 
-                photos = {
-                    user['id']: (photo := user['photo_id'])[photo.find('_') + 1:]
-                    for user in users if 'photo_id' in user
-                }
+            photos = {
+                user['id']: (photo := user['photo_id'])[photo.find('_') + 1:]
+                for user in users if 'photo_id' in user
+            }
 
-                for user in photos:
-                    if not method.likes.isLiked(type='photo', owner_id=user, item_id=photos[user])['liked']:
-                        method.likes.add(type='photo', owner_id=user, item_id=photos[user])
+            for user in photos:
+                while True:
+                    print(user)
+                    try:
+                        if not method.likes.isLiked(type='photo', owner_id=user, item_id=photos[user])['liked']:
+                            method.likes.add(type='photo', owner_id=user, item_id=photos[user])
+                            print('done')
+                        break
+                    except Exception as error:
+                        print(error)
 
-                friends = friends[MAX_PHOTOS:]
-
-            except Exception:
-                ...
+            friends = friends[MAX_PHOTOS:]
 
     except Exception as error:
         print(error)
